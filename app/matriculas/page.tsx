@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '../lib/supabase/client'
-import Link from 'next/link'
 
 export default function MatriculasPage() {
   const [estudiantes, setEstudiantes] = useState<any[]>([])
@@ -10,8 +9,8 @@ export default function MatriculasPage() {
   const [creando, setCreando] = useState(false)
   const [error, setError] = useState('')
   const [colegioId, setColegioId] = useState('')
+  const [mostrarForm, setMostrarForm] = useState(false)
 
-  // Campos del formulario
   const [nombreCompleto, setNombreCompleto] = useState('')
   const [documento, setDocumento] = useState('')
   const [grado, setGrado] = useState('')
@@ -20,7 +19,6 @@ export default function MatriculasPage() {
 
   const cargarDatos = async () => {
     const supabase = createClient()
-
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -30,9 +28,7 @@ export default function MatriculasPage() {
       .eq('id', user.id)
       .single()
 
-    if (perfil?.colegio_id) {
-      setColegioId(perfil.colegio_id)
-    }
+    if (perfil?.colegio_id) setColegioId(perfil.colegio_id)
 
     const { data, error } = await supabase
       .from('estudiantes')
@@ -74,112 +70,95 @@ export default function MatriculasPage() {
       setGrado('')
       setNombreAcudiente('')
       setTelefonoAcudiente('')
+      setMostrarForm(false)
       cargarDatos()
     }
     setCreando(false)
   }
 
+  const inputClass = "w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+
   return (
-    <div style={{ maxWidth: '700px', margin: '40px auto', padding: '20px' }}>
-      <Link href="/">← Volver</Link>
-      <h1>Matrículas</h1>
-
-      <form onSubmit={handleMatricular} style={{ marginBottom: '30px', border: '1px solid #ddd', padding: '20px' }}>
-        <h3>Matricular nuevo estudiante</h3>
-
-        <div style={{ marginBottom: '10px' }}>
-          <label>Nombre completo</label>
-          <input
-            type="text"
-            value={nombreCompleto}
-            onChange={(e) => setNombreCompleto(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '10px' }}>
-          <label>Documento de identidad</label>
-          <input
-            type="text"
-            value={documento}
-            onChange={(e) => setDocumento(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '10px' }}>
-          <label>Grado</label>
-          <input
-            type="text"
-            placeholder="Ej: 5to grado"
-            value={grado}
-            onChange={(e) => setGrado(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '10px' }}>
-          <label>Nombre del acudiente</label>
-          <input
-            type="text"
-            value={nombreAcudiente}
-            onChange={(e) => setNombreAcudiente(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '10px' }}>
-          <label>Teléfono del acudiente</label>
-          <input
-            type="text"
-            value={telefonoAcudiente}
-            onChange={(e) => setTelefonoAcudiente(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-
+    <div className="p-10 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Matrículas</h1>
         <button
-          type="submit"
-          disabled={creando}
-          style={{ padding: '10px 20px', backgroundColor: '#000', color: '#fff', border: 'none' }}
+          onClick={() => setMostrarForm(!mostrarForm)}
+          className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
         >
-          {creando ? 'Matriculando...' : 'Matricular estudiante'}
+          {mostrarForm ? 'Cancelar' : '+ Matricular estudiante'}
         </button>
-      </form>
+      </div>
 
-      <h3>Estudiantes matriculados ({estudiantes.length})</h3>
+      {mostrarForm && (
+        <form onSubmit={handleMatricular} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-6 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Nombre completo</label>
+              <input type="text" value={nombreCompleto} onChange={(e) => setNombreCompleto(e.target.value)} required className={inputClass} />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Documento de identidad</label>
+              <input type="text" value={documento} onChange={(e) => setDocumento(e.target.value)} required className={inputClass} />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Grado</label>
+              <input type="text" placeholder="Ej: 5to grado" value={grado} onChange={(e) => setGrado(e.target.value)} required className={inputClass} />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Nombre del acudiente</label>
+              <input type="text" value={nombreAcudiente} onChange={(e) => setNombreAcudiente(e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Teléfono del acudiente</label>
+              <input type="text" value={telefonoAcudiente} onChange={(e) => setTelefonoAcudiente(e.target.value)} className={inputClass} />
+            </div>
+          </div>
 
-      {cargando ? (
-        <p>Cargando...</p>
-      ) : estudiantes.length === 0 ? (
-        <p>Aún no hay estudiantes matriculados.</p>
-      ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #333', textAlign: 'left' }}>
-              <th style={{ padding: '8px' }}>Nombre</th>
-              <th style={{ padding: '8px' }}>Documento</th>
-              <th style={{ padding: '8px' }}>Grado</th>
-              <th style={{ padding: '8px' }}>Acudiente</th>
-            </tr>
-          </thead>
-          <tbody>
-            {estudiantes.map((est) => (
-              <tr key={est.id} style={{ borderBottom: '1px solid #ddd' }}>
-                <td style={{ padding: '8px' }}>{est.nombre_completo}</td>
-                <td style={{ padding: '8px' }}>{est.documento_identidad}</td>
-                <td style={{ padding: '8px' }}>{est.grado}</td>
-                <td style={{ padding: '8px' }}>{est.nombre_acudiente || '-'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={creando}
+            className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            {creando ? 'Matriculando...' : 'Matricular estudiante'}
+          </button>
+        </form>
       )}
+
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
+          <span className="text-sm font-medium text-gray-600">Estudiantes matriculados ({estudiantes.length})</span>
+        </div>
+
+        {cargando ? (
+          <p className="p-5 text-gray-400 text-sm">Cargando...</p>
+        ) : estudiantes.length === 0 ? (
+          <p className="p-5 text-gray-400 text-sm">Aún no hay estudiantes matriculados.</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-gray-500 border-b border-gray-100">
+                <th className="px-5 py-3 font-medium">Nombre</th>
+                <th className="px-5 py-3 font-medium">Documento</th>
+                <th className="px-5 py-3 font-medium">Grado</th>
+                <th className="px-5 py-3 font-medium">Acudiente</th>
+              </tr>
+            </thead>
+            <tbody>
+              {estudiantes.map((est) => (
+                <tr key={est.id} className="border-b border-gray-50 last:border-0">
+                  <td className="px-5 py-3 text-gray-800">{est.nombre_completo}</td>
+                  <td className="px-5 py-3 text-gray-600">{est.documento_identidad}</td>
+                  <td className="px-5 py-3 text-gray-600">{est.grado}</td>
+                  <td className="px-5 py-3 text-gray-600">{est.nombre_acudiente || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   )
 }

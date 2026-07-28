@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '../lib/supabase/client'
-import Link from 'next/link'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -81,65 +80,79 @@ export default function BoletinesPage() {
     doc.save(`boletin_${estudiante.nombre_completo.replace(/\s+/g, '_')}.pdf`)
   }
 
+  const inputClass = "w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+
+  const colorNota = (n: number) => {
+    if (n >= 4) return 'text-green-600 bg-green-50'
+    if (n >= 3) return 'text-amber-600 bg-amber-50'
+    return 'text-red-600 bg-red-50'
+  }
+
   return (
-    <div style={{ maxWidth: '700px', margin: '40px auto', padding: '20px' }}>
-      <Link href="/">← Volver</Link>
-      <h1>Boletines</h1>
+    <div className="p-10 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Boletines</h1>
 
-      {cargando ? (
-        <p>Cargando estudiantes...</p>
-      ) : (
-        <div style={{ marginBottom: '20px' }}>
-          <label>Selecciona un estudiante</label>
-          <select
-            value={estudianteId}
-            onChange={(e) => cargarNotasDelEstudiante(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          >
-            <option value="">-- Selecciona --</option>
-            {estudiantes.map((est) => (
-              <option key={est.id} value={est.id}>{est.nombre_completo}</option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-6">
+        {cargando ? (
+          <p className="text-gray-400 text-sm">Cargando estudiantes...</p>
+        ) : (
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Selecciona un estudiante</label>
+            <select
+              value={estudianteId}
+              onChange={(e) => cargarNotasDelEstudiante(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">-- Selecciona --</option>
+              {estudiantes.map((est) => (
+                <option key={est.id} value={est.id}>{est.nombre_completo}</option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
 
-      {cargandoNotas && <p>Cargando notas...</p>}
+      {cargandoNotas && <p className="text-gray-400 text-sm">Cargando notas...</p>}
 
       {estudianteId && !cargandoNotas && (
-        <div>
-          <h3>Notas encontradas: {notas.length}</h3>
-
-          {notas.length === 0 ? (
-            <p>Este estudiante aún no tiene notas registradas.</p>
-          ) : (
-            <>
-              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid #333', textAlign: 'left' }}>
-                    <th style={{ padding: '8px' }}>Materia</th>
-                    <th style={{ padding: '8px' }}>Periodo</th>
-                    <th style={{ padding: '8px' }}>Calificación</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {notas.map((n) => (
-                    <tr key={n.id} style={{ borderBottom: '1px solid #ddd' }}>
-                      <td style={{ padding: '8px' }}>{n.materias?.nombre}</td>
-                      <td style={{ padding: '8px' }}>{n.periodo}</td>
-                      <td style={{ padding: '8px' }}>{n.calificacion}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-600">Notas encontradas ({notas.length})</span>
+            {notas.length > 0 && (
               <button
                 onClick={generarPDF}
-                style={{ padding: '10px 20px', backgroundColor: '#000', color: '#fff', border: 'none' }}
+                className="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
               >
-                Descargar boletín en PDF
+                Descargar PDF
               </button>
-            </>
+            )}
+          </div>
+
+          {notas.length === 0 ? (
+            <p className="p-5 text-gray-400 text-sm">Este estudiante aún no tiene notas registradas.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-500 border-b border-gray-100">
+                  <th className="px-5 py-3 font-medium">Materia</th>
+                  <th className="px-5 py-3 font-medium">Periodo</th>
+                  <th className="px-5 py-3 font-medium">Calificación</th>
+                </tr>
+              </thead>
+              <tbody>
+                {notas.map((n) => (
+                  <tr key={n.id} className="border-b border-gray-50 last:border-0">
+                    <td className="px-5 py-3 text-gray-800">{n.materias?.nombre}</td>
+                    <td className="px-5 py-3 text-gray-600">{n.periodo}</td>
+                    <td className="px-5 py-3">
+                      <span className={`px-2 py-1 rounded-md text-xs font-semibold ${colorNota(n.calificacion)}`}>
+                        {n.calificacion}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       )}

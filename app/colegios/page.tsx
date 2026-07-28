@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '../lib/supabase/client'
-import Link from 'next/link'
 
 export default function ColegiosPage() {
   const [colegios, setColegios] = useState<any[]>([])
@@ -48,44 +47,45 @@ export default function ColegiosPage() {
   }
 
   return (
-    <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px' }}>
-      <Link href="/">← Volver</Link>
-      <h1>Colegios</h1>
+    <div className="p-10 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Colegios</h1>
 
-      <form onSubmit={handleCrear} style={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
+      <form onSubmit={handleCrear} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm mb-6 flex gap-3">
         <input
           type="text"
           placeholder="Nombre del colegio"
           value={nombreNuevo}
           onChange={(e) => setNombreNuevo(e.target.value)}
           required
-          style={{ flex: 1, padding: '8px' }}
+          className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
         />
         <button
           type="submit"
           disabled={creando}
-          style={{ padding: '8px 20px', backgroundColor: '#000', color: '#fff', border: 'none' }}
+          className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
           {creando ? 'Creando...' : 'Crear colegio'}
         </button>
       </form>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-      {cargando ? (
-        <p>Cargando colegios...</p>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {colegios.map((colegio) => (
-            <li
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        {cargando ? (
+          <p className="p-5 text-gray-400 text-sm">Cargando colegios...</p>
+        ) : colegios.length === 0 ? (
+          <p className="p-5 text-gray-400 text-sm">Aún no hay colegios registrados.</p>
+        ) : (
+          colegios.map((colegio, i) => (
+            <div
               key={colegio.id}
-              style={{ padding: '10px', borderBottom: '1px solid #ddd' }}
+              className={`px-5 py-4 text-sm text-gray-700 ${i !== colegios.length - 1 ? 'border-b border-gray-100' : ''}`}
             >
               {colegio.nombre}
-            </li>
-          ))}
-        </ul>
-      )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   )
 }
