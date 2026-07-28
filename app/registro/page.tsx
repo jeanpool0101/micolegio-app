@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '../lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -8,9 +8,20 @@ export default function RegistroPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [nombreCompleto, setNombreCompleto] = useState('')
+  const [colegioId, setColegioId] = useState('')
+  const [colegios, setColegios] = useState<any[]>([])
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    const cargarColegios = async () => {
+      const supabase = createClient()
+      const { data } = await supabase.from('colegios').select('id, nombre')
+      setColegios(data || [])
+    }
+    cargarColegios()
+  }, [])
 
   const handleRegistro = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,7 +46,8 @@ export default function RegistroPage() {
         id: data.user.id,
         nombre_completo: nombreCompleto,
         email: email,
-        rol: 'super_admin',
+        rol: 'docente',
+        colegio_id: colegioId,
       })
 
       if (errorPerfil) {
@@ -62,6 +74,22 @@ export default function RegistroPage() {
             required
             style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+          <label>Colegio</label>
+          <select
+            value={colegioId}
+            onChange={(e) => setColegioId(e.target.value)}
+            required
+            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+          >
+            <option value="">Selecciona un colegio</option>
+            {colegios.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre}
+              </option>
+            ))}
+          </select>
         </div>
         <div style={{ marginBottom: '15px' }}>
           <label>Correo electrónico</label>
